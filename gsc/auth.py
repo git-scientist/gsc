@@ -1,11 +1,12 @@
 import os
 import json
-import typer
 import pathlib
 import requests
 import http.server
 import urllib.parse
 import typing as t
+
+from gsc import cli
 
 
 TIMEOUT_S = 30 * 60
@@ -67,7 +68,7 @@ def login(email: str):
     if res.status_code != 200:
         raise AuthenticationError("User not found.")
 
-    typer.echo("✉️  We sent you an email. Click the link inside to login.")
+    cli.info("✉️  We sent you an email. Click the link inside to login.")
 
     # Start a localhost HTTP server to wait for the email verification token.
     server = http.server.HTTPServer(("", LOCAL_PORT), TokenHandler)

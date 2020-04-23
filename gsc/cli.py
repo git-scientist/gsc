@@ -1,30 +1,62 @@
 import typer
-from gsc import auth, client
+from gsc import auth, client, verifier
 
 app = typer.Typer()
+
+
+def success(msg: str):
+    typer.secho(msg, fg=typer.colors.GREEN, bold=True)
+
+
+def info(msg: str):
+    typer.echo(msg)
+
+
+def title(msg: str):
+    typer.secho(msg + "\n", fg=typer.colors.GREEN, bold=True)
+
+
+def warn(msg: str):
+    typer.secho(msg + "\n", fg=typer.colors.YELLOW, bold=False)
+
+
+def error(msg: str):
+    typer.secho(msg, fg=typer.colors.RED, bold=True)
+    raise typer.Exit(1)
 
 
 @app.command("login")
 def login(email: str = typer.Option(..., prompt=True)):
     try:
         auth.login(email)
-        typer.secho("Login Success.", fg=typer.colors.GREEN, bold=True)
+        success("🎉 Login Success.")
     except auth.AuthenticationError as e:
-        typer.secho(str(e), fg=typer.colors.RED, bold=True)
-        raise typer.Exit(1)
+        error(str(e))
 
 
 @app.command("ping")
 def ping():
     try:
         client.ping()
-        typer.secho("Pong.", fg=typer.colors.GREEN, bold=True)
+        success("Pong.")
     except auth.AuthenticationError as e:
-        typer.secho(str(e), fg=typer.colors.RED, bold=True)
-        raise typer.Exit(1)
+        error(str(e))
     except client.APIError as e:
-        typer.secho(str(e), fg=typer.colors.RED, bold=True)
-        raise typer.Exit(1)
+        error(str(e))
+
+
+@app.command("verify")
+def verify():
+    try:
+        client.ping()
+        verifier.verify()
+        success("✔️  Exercise complete!")
+    except verifier.VerifyError as e:
+        error(str(e))
+    except auth.AuthenticationError as e:
+        error(str(e))
+    except client.APIError as e:
+        error(str(e))
 
 
 def main():
