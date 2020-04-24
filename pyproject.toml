@@ -11,6 +11,7 @@ repository = "https://github.com/git-scientist/gsc"
 [tool.poetry.dependencies]
 python = "^3.7"
 typer = "^0.1.1"
+requests = "^2.23.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
