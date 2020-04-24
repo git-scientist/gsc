@@ -1,4 +1,5 @@
 import typer
+import gsc
 from gsc import auth, client, verifier
 
 app = typer.Typer()
@@ -25,7 +26,7 @@ def error(msg: str):
     raise typer.Exit(1)
 
 
-@app.command("login")
+@app.command()
 def login(email: str = typer.Option(..., prompt=True)):
     try:
         auth.login(email)
@@ -34,7 +35,7 @@ def login(email: str = typer.Option(..., prompt=True)):
         error(str(e))
 
 
-@app.command("ping")
+@app.command()
 def ping():
     try:
         client.ping()
@@ -45,7 +46,7 @@ def ping():
         error(str(e))
 
 
-@app.command("verify")
+@app.command()
 def verify():
     try:
         client.ping()
@@ -57,6 +58,27 @@ def verify():
         error(str(e))
     except client.APIError as e:
         error(str(e))
+
+
+@app.callback()
+def version_callback(value: bool):
+    if value:
+        version()
+
+
+@app.command(hidden=True)
+def version():
+    typer.echo(f"gsc version: {gsc.__version__}")
+    raise typer.Exit()
+
+
+@app.callback()
+def options(version: bool = typer.Option(None, "--version", callback=version_callback)):
+    """
+    gsc is the Git for Scientists practical exercise helper.
+
+    See https://www.gitscientist.com for more.
+    """
 
 
 def main():
