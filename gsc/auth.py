@@ -68,7 +68,7 @@ def login(email: str):
     if res.status_code != 200:
         raise AuthenticationError("User not found.")
 
-    cli.info("✉️  We sent you an email. Click the link inside to login.")
+    cli.info("We sent you an email. Click the link inside to login.")
 
     # Start a localhost HTTP server to wait for the email verification token.
     server = http.server.HTTPServer(("", LOCAL_PORT), TokenHandler)

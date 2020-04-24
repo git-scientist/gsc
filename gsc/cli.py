@@ -30,7 +30,8 @@ def error(msg: str):
 def login(email: str = typer.Option(..., prompt=True)):
     try:
         auth.login(email)
-        success("🎉 Login Success.")
+        success("Login Success.")
+
     except auth.AuthenticationError as e:
         error(str(e))
 
@@ -51,7 +52,7 @@ def verify():
     try:
         client.ping()
         verifier.verify()
-        success("✔️  Exercise complete!")
+        success("Exercise complete!")
     except verifier.VerifyError as e:
         error(str(e))
     except auth.AuthenticationError as e:

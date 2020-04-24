@@ -18,7 +18,7 @@ def verify():
 
     gsc_id = open(".gsc_id", "r").read().strip()
 
-    cli.title(f"🌍 Verifying {gsc_id}")
+    cli.title(f"Verifying {gsc_id}")
 
     if gsc_id == "my_first_commit":
         gsc.exercises.my_first_commit.verify()
