@@ -28,10 +28,9 @@ def verify():
         )
 
     # We should ideally have this exact commit message but no bother if not.
-    res = subprocess.run(["git", "log", "-1", "--pretty=%B"], capture_output=True)
-    res = res.stdout.decode("utf-8").strip()
-    utils.check_commit_message(res)
-    if res != "Switch `subtract` to use correct operator":
+    msg = utils.most_recent_commit_message()
+    utils.check_commit_message(msg)
+    if msg != "Switch `subtract` to use correct operator":
         cli.warn(
             "Looks like you didn't choose the suggested commit message.\n"
             'When you get to the "Useful Commit Messages" section, be sure to come back here '

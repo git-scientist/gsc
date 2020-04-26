@@ -1,4 +1,5 @@
 import subprocess
+import typing as t
 from gsc import cli
 
 
@@ -15,6 +16,22 @@ def on_branch(branch: str) -> bool:
 def tests_pass() -> bool:
     res = subprocess.run(["pytest"], capture_output=True)
     return res.returncode == 0
+
+
+def remove_hash(msg: str) -> str:
+    chunks = msg.split(" ", 1)[1:]
+    return " ".join(chunks).strip()
+
+
+def most_recent_commit_message() -> str:
+    res = subprocess.run(["git", "log", "-1", "--oneline"], capture_output=True)
+    return remove_hash(res.stdout.decode("utf-8"))
+
+
+def commit_messages() -> t.List[str]:
+    res = subprocess.run(["git", "log", "--oneline"], capture_output=True)
+    msgs = res.stdout.decode("utf-8").split("\n")[:-1]
+    return list(map(remove_hash, msgs))
 
 
 def check_commit_message(msg: str) -> None:

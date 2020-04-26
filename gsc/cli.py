@@ -1,6 +1,6 @@
 import typer
 import gsc
-from gsc import auth, client, verifier
+from gsc import auth, client, verifier, setup_exercise
 
 app = typer.Typer()
 
@@ -44,6 +44,15 @@ def ping():
     except auth.AuthenticationError as e:
         error(str(e))
     except client.APIError as e:
+        error(str(e))
+
+
+@app.command()
+def setup(exercise: str = typer.Argument(...)):
+    try:
+        setup_exercise.setup(exercise)
+        success("Done.")
+    except setup_exercise.SetupError as e:
         error(str(e))
 
 
