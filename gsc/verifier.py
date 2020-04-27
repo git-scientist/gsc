@@ -22,14 +22,11 @@ def verify(exercise: str = None):
         raise VerifyError("Unknown Git Scientist exercise. Try updating gsc.")
 
     if os.getcwd().endswith(gsc.exercises.push_and_pull.PULL_SUFFIX):
-        cli.title(f"Verifying push_and_pull")
-        gsc.exercises.push_and_pull.verify()
-        return
-
-    if not os.path.exists(".gsc_id"):
+        gsc_id = "push_and_pull"
+    elif not os.path.exists(".gsc_id"):
         raise VerifyError("This repo is not a Git Scientist exercise.")
-
-    gsc_id = open(".gsc_id", "r").read().strip()
+    else:
+        gsc_id = open(".gsc_id", "r").read().strip()
 
     cli.title(f"Verifying {gsc_id}")
 
