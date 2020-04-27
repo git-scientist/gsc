@@ -1,17 +1,25 @@
 import os
 from gsc import cli, client
-import gsc.exercises.my_first_commit, gsc.exercises.push_and_pull
+import gsc.exercises.my_first_commit, gsc.exercises.push_and_pull, gsc.exercises.ssh_clone
 
 
 class VerifyError(Exception):
     pass
 
 
-def verify():
+def verify(exercise: str = None):
     while not os.path.exists(".git"):
         os.chdir("..")
         if os.getcwd() == "/":
             raise VerifyError("This is not a git repo.")
+
+    if exercise == "ssh":
+        cli.title(f"Verifying ssh")
+        gsc.exercises.ssh_clone.verify()
+        client.complete_exercise("ssh_clone")
+        return
+    elif exercise:
+        raise VerifyError("Unknown Git Scientist exercise. Try updating gsc.")
 
     if os.getcwd().endswith(gsc.exercises.push_and_pull.PULL_SUFFIX):
         # Special case if we haven't pulled the commit which adds .gsc_id

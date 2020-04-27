@@ -57,10 +57,10 @@ def setup(exercise: str = typer.Argument(...)):
 
 
 @app.command()
-def verify():
+def verify(exercise: str = typer.Argument(None)):
     try:
         client.ping()
-        verifier.verify()
+        verifier.verify(exercise)
         success("Exercise complete!")
     except verifier.VerifyError as e:
         error(str(e))
