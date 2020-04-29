@@ -27,7 +27,7 @@ def verify():
             f"You need to make 1 commit but you've made {res[0]}."
         )
 
-    # We should ideally have this exact commit message but no bother if not.
+    # We should ideally have this exact commit message but no bother if not
     msg = utils.most_recent_commit_message()
     utils.check_commit_message(msg)
     if msg != "Switch `subtract` to use correct operator":

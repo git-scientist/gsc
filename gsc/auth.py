@@ -83,7 +83,7 @@ def login(email: str):
 
 def get_token() -> str:
     try:
-        return open(GSC_TOKEN, "r").read()
+        return pathlib.Path(GSC_TOKEN).read_text()
     except FileNotFoundError:
         raise AuthenticationError("Not logged in.")
 

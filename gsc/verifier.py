@@ -1,6 +1,7 @@
 import os
+import pathlib
 from gsc import cli, client
-import gsc.exercises.my_first_commit, gsc.exercises.push_and_pull, gsc.exercises.ssh_clone
+import gsc.exercises.my_first_commit, gsc.exercises.push_and_pull, gsc.exercises.ssh_clone, gsc.exercises.sync_error
 
 
 class VerifyError(Exception):
@@ -19,14 +20,14 @@ def verify(exercise: str = None):
         client.complete_exercise("ssh_clone")
         return
     elif exercise:
-        raise VerifyError("Unknown Git Scientist exercise. Try updating gsc.")
+        raise VerifyError("Unknown Git Scientist exercise. Try upgrading gsc.")
 
     if os.getcwd().endswith(gsc.exercises.push_and_pull.PULL_SUFFIX):
         gsc_id = "push_and_pull"
     elif not os.path.exists(".gsc_id"):
         raise VerifyError("This repo is not a Git Scientist exercise.")
     else:
-        gsc_id = open(".gsc_id", "r").read().strip()
+        gsc_id = pathlib.Path(".gsc_id").read_text().strip()
 
     cli.title(f"Verifying {gsc_id}")
 
@@ -36,5 +37,8 @@ def verify(exercise: str = None):
     elif gsc_id == "push_and_pull":
         gsc.exercises.push_and_pull.verify()
         client.complete_exercise(gsc_id)
+    elif gsc_id == "sync_error":
+        gsc.exercises.sync_error.verify()
+        client.complete_exercise(gsc_id)
     else:
-        raise VerifyError("Unknown Git Scientist exercise. Try updating gsc.")
+        raise VerifyError("Unknown Git Scientist exercise. Try upgrading gsc.")

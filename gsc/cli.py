@@ -1,6 +1,6 @@
 import typer
 import gsc
-from gsc import auth, client, verifier, setup_exercise
+from gsc import auth, client, verifier, setup_exercise, reset_exercise
 
 app = typer.Typer()
 
@@ -47,11 +47,22 @@ def ping():
 
 
 @app.command()
-def setup(exercise: str = typer.Argument(...)):
+def setup(exercise: str = typer.Argument(None)):
     try:
         setup_exercise.setup(exercise)
         success("Done.")
     except setup_exercise.SetupError as e:
+        error(str(e))
+
+
+@app.command()
+def reset():
+    try:
+        reset_exercise.reset()
+        success("Exercise reset.")
+    except setup_exercise.SetupError as e:
+        error(str(e))
+    except reset_exercise.ResetError as e:
         error(str(e))
 
 
