@@ -55,9 +55,9 @@ def subtract(x, y):
 
     # Restore .git
     cli.info("Forgetting about remote commit.")
-    shutil.rmtree(".git")
+    utils.rmtree_readonly(".git")
     shutil.copytree(".git.bak", ".git")
-    shutil.rmtree(".git.bak")
+    utils.rmtree_readonly(".git.bak")
 
     # Create local commit
     cli.info("Implementing the divide function.")

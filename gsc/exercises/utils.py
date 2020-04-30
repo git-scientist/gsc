@@ -1,3 +1,6 @@
+import os
+import stat
+import shutil
 import subprocess
 import typing as t
 from gsc import cli
@@ -49,3 +52,12 @@ def check_commit_message(msg: str) -> None:
             f"You've used {len(msg)}.\n"
             "Try to make your commit messages more concise."
         )
+
+
+def remove_readonly(func, path, execinfo):
+    os.chmod(path, stat.S_IWRITE)
+    func(path)
+
+
+def rmtree_readonly(root):
+    shutil.rmtree(root, onerror=remove_readonly)
