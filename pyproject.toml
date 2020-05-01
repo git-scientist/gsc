@@ -15,7 +15,7 @@ requests = "^2.23.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
-mypy = {version = "^0.770", python = ">=3.6,<3.8"}
+mypy = "^0.770"
 pytype = {version = "^2020.4.1", python = ">=3.6,<3.8"}
 
 [tool.poetry.scripts]
