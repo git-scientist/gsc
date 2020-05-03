@@ -164,4 +164,20 @@ def verify():
             "Run `gsc reset` and try again."
         )
 
+    # We should have chosen the correct version of the code in the conflict
+    codefile = pathlib.Path(FILE_NAME)
+    code = codefile.read_text()
+    if (
+        """
+def subtract(x, y):
+    return x - y"""
+        not in code
+    ):
+        raise verifier.VerifyError(
+            "You chose the wrong version of the code when fixing the conflict.\n"
+            "This implementation is broken!\n"
+            'Take another look at "Fix the Merge Conflict".\n'
+            "Run `gsc reset` and try again."
+        )
+
     cli.success("Done.")
