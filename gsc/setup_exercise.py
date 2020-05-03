@@ -1,7 +1,7 @@
 import os
 import pathlib
 from gsc import cli
-import gsc.exercises.push_and_pull, gsc.exercises.sync_error
+import gsc.exercises.push_and_pull, gsc.exercises.sync_error, gsc.exercises.merge_conflict
 
 
 class SetupError(Exception):
@@ -31,5 +31,7 @@ def setup(gsc_id: str):
         gsc.exercises.push_and_pull.setup()
     elif gsc_id == "sync_error":
         gsc.exercises.sync_error.setup()
+    elif gsc_id == "merge_conflict":
+        gsc.exercises.merge_conflict.setup()
     else:
         raise SetupError("Unknown Git Scientist exercise. Try upgrading gsc.")

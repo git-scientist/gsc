@@ -1,7 +1,8 @@
 import os
 import pathlib
 from gsc import cli, client
-import gsc.exercises.my_first_commit, gsc.exercises.push_and_pull, gsc.exercises.ssh_clone, gsc.exercises.sync_error
+import gsc.exercises.my_first_commit, gsc.exercises.push_and_pull, gsc.exercises.ssh_clone
+import gsc.exercises.sync_error, gsc.exercises.merge_conflict
 
 
 class VerifyError(Exception):
@@ -39,6 +40,9 @@ def verify(exercise: str = None):
         client.complete_exercise(gsc_id)
     elif gsc_id == "sync_error":
         gsc.exercises.sync_error.verify()
+        client.complete_exercise(gsc_id)
+    elif gsc_id == "merge_conflict":
+        gsc.exercises.merge_conflict.verify()
         client.complete_exercise(gsc_id)
     else:
         raise VerifyError("Unknown Git Scientist exercise. Try upgrading gsc.")

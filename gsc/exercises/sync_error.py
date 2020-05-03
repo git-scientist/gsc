@@ -81,10 +81,6 @@ def divide(x, y):
     if res.returncode != 0:
         raise setup_exercise.SetupError("Failed to commit second code change.")
 
-    res = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True)
-    if res.returncode != 0:
-        raise setup_exercise.SetupError("Failed to get hash of second commit.")
-
     # Stash remote commit hash for verification later
     pathlib.Path(".gsc_state").write_text(json.dumps(state))
 
