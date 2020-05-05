@@ -8,7 +8,7 @@ from gsc import cli
 
 def clean_status() -> bool:
     res = subprocess.run(["git", "status"], capture_output=True)
-    return b"working tree clean" in res.stdout
+    return b"nothing to commit" in res.stdout
 
 
 def on_branch(branch: str) -> bool:
