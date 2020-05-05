@@ -2,6 +2,7 @@ import os
 import pathlib
 from gsc import cli
 import gsc.exercises.push_and_pull, gsc.exercises.sync_error, gsc.exercises.merge_conflict
+import gsc.exercises.multiple_remotes
 
 
 class SetupError(Exception):
@@ -33,5 +34,7 @@ def setup(gsc_id: str):
         gsc.exercises.sync_error.setup()
     elif gsc_id == "merge_conflict":
         gsc.exercises.merge_conflict.setup()
+    elif gsc_id == "multiple_remotes":
+        gsc.exercises.multiple_remotes.setup()
     else:
         raise SetupError("Unknown Git Scientist exercise. Try upgrading gsc.")

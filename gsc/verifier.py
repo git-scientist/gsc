@@ -2,7 +2,7 @@ import os
 import pathlib
 from gsc import cli, client
 import gsc.exercises.my_first_commit, gsc.exercises.push_and_pull, gsc.exercises.ssh_clone
-import gsc.exercises.sync_error, gsc.exercises.merge_conflict
+import gsc.exercises.sync_error, gsc.exercises.merge_conflict, gsc.exercises.multiple_remotes
 
 
 class VerifyError(Exception):
@@ -34,15 +34,14 @@ def verify(exercise: str = None):
 
     if gsc_id == "my_first_commit":
         gsc.exercises.my_first_commit.verify()
-        client.complete_exercise(gsc_id)
     elif gsc_id == "push_and_pull":
         gsc.exercises.push_and_pull.verify()
-        client.complete_exercise(gsc_id)
     elif gsc_id == "sync_error":
         gsc.exercises.sync_error.verify()
-        client.complete_exercise(gsc_id)
     elif gsc_id == "merge_conflict":
         gsc.exercises.merge_conflict.verify()
-        client.complete_exercise(gsc_id)
+    elif gsc_id == "multiple_remotes":
+        gsc.exercises.multiple_remotes.verify()
     else:
         raise VerifyError("Unknown Git Scientist exercise. Try upgrading gsc.")
+    client.complete_exercise(gsc_id)

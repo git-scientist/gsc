@@ -114,13 +114,6 @@ def reset():
     setup()
 
 
-def pluralise(number: str) -> str:
-    if number == "1":
-        return "is 1 commit"
-    else:
-        return f"are {number} commits"
-
-
 def verify():
     if not utils.clean_status():
         raise verifier.VerifyError(
