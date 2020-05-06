@@ -3,6 +3,7 @@ import pathlib
 from gsc import cli, client
 import gsc.exercises.my_first_commit, gsc.exercises.push_and_pull, gsc.exercises.ssh_clone
 import gsc.exercises.sync_error, gsc.exercises.merge_conflict, gsc.exercises.multiple_remotes
+import gsc.exercises.use_the_force
 
 
 class VerifyError(Exception):
@@ -42,6 +43,8 @@ def verify(exercise: str = None):
         gsc.exercises.merge_conflict.verify()
     elif gsc_id == "multiple_remotes":
         gsc.exercises.multiple_remotes.verify()
+    elif gsc_id == "use_the_force":
+        gsc.exercises.use_the_force.verify()
     else:
         raise VerifyError("Unknown Git Scientist exercise. Try upgrading gsc.")
     client.complete_exercise(gsc_id)

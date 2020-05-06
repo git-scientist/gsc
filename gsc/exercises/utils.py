@@ -3,7 +3,14 @@ import stat
 import shutil
 import subprocess
 import typing as t
-from gsc import cli
+from gsc import cli, verifier
+
+
+def pluralise_commits(number: str) -> str:
+    if number == "1":
+        return "is 1 commit"
+    else:
+        return f"are {number} commits"
 
 
 def clean_status() -> bool:
@@ -19,6 +26,21 @@ def on_branch(branch: str) -> bool:
 def tests_pass() -> bool:
     res = subprocess.run(["pytest"], capture_output=True)
     return res.returncode == 0
+
+
+def assert_up_to_date_with_remote(branch: str) -> None:
+    res = subprocess.run(
+        ["git", "rev-list", "--left-right", "--count", f"{branch}...origin/{branch}"],
+        capture_output=True,
+    )
+    commits = res.stdout.decode("utf-8").strip().split("\t")
+    if ["0", "0"] != commits:
+        raise verifier.VerifyError(
+            f"There {pluralise_commits(commits[0])} on your local repo which aren't on your remote.\n"
+            f"There {pluralise_commits(commits[1])} on your remote repo which aren't on your local.\n"
+            "Your local and remote repos should have the same commits.\n"
+            "Run `gsc reset` to try again if you aren't sure what's gone wrong."
+        )
 
 
 def remove_hash(msg: str) -> str:

@@ -106,13 +106,6 @@ def reset():
     setup()
 
 
-def pluralise(number: str) -> str:
-    if number == "1":
-        return "is 1 commit"
-    else:
-        return f"are {number} commits"
-
-
 def verify():
     if not utils.clean_status():
         raise verifier.VerifyError(
@@ -155,17 +148,6 @@ def verify():
         )
 
     # We should be up to date with the remote
-    res = subprocess.run(
-        ["git", "rev-list", "--left-right", "--count", "master...origin/master"],
-        capture_output=True,
-    )
-    res = res.stdout.decode("utf-8").strip().split("\t")
-    if ["0", "0"] != res:
-        raise verifier.VerifyError(
-            f"There {pluralise(res[0])} on your local repo which aren't on your remote.\n"
-            f"There {pluralise(res[1])} on your remote repo which aren't on your local.\n"
-            "Your local and remote repos should have the same commits.\n"
-            "Run `gsc reset` to try again if you aren't sure what's gone wrong."
-        )
+    utils.assert_up_to_date_with_remote("master")
 
     cli.success("Done.")

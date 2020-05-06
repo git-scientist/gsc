@@ -6,8 +6,8 @@ import subprocess
 from gsc import verifier, cli, setup_exercise
 from gsc.exercises import utils
 
-MASTER_COMMIT_MSG = "Fix subtract function for some numbers"
-BRANCH_COMMIT_MSG = "Fix subtract function for all numbers"
+MASTER_COMMIT_MSG = "Fix divide function for some numbers"
+BRANCH_COMMIT_MSG = "Fix divide function for all numbers"
 FILE_NAME = "useful_things.py"
 BRANCH_NAME = "fix-subtract"
 
@@ -26,21 +26,20 @@ def setup():
     codefile = pathlib.Path(FILE_NAME)
 
     # Create commit on master
-    cli.info("Implementing the subtract function incorrectly on master.")
+    cli.info("Implementing the divide function incorrectly on master.")
     code = codefile.read_text()
-    implemented_subtract = code.replace(
+    implemented_divide = code.replace(
         """
-def subtract(x, y):
-    return x + y
+def divide(x, y):
+    return "Hello World"
 """,
         """
-def subtract(x, y):
-    if x > 0:
-        return x - y
-    return x + y
+def divide(x, y):
+    # This is probably correct - don't have time to test
+    return x % y
 """,
     )
-    codefile.write_text(implemented_subtract)
+    codefile.write_text(implemented_divide)
 
     res = subprocess.run(["git", "add", FILE_NAME], capture_output=True)
     if res.returncode != 0:
@@ -57,23 +56,29 @@ def subtract(x, y):
         raise setup_exercise.SetupError("Failed to get hash of commit on master.")
     state["master_hash"] = res.stdout.decode("utf-8").strip()
 
+    # Push master branch
+    cli.info("Pushing master.")
+    res = subprocess.run(["git", "push"], capture_output=True)
+    if res.returncode != 0:
+        raise setup_exercise.SetupError("Failed to push commit.")
+
     # Switch branch
     cli.info("Switching branch.")
     subprocess.run(["git", "checkout", BRANCH_NAME], capture_output=True)
 
     # Create local commit
-    cli.info(f"Implementing the subtract function correctly on branch `{BRANCH_NAME}`.")
-    implemented_subtract = code.replace(
+    cli.info(f"Implementing the divide function correctly on branch `{BRANCH_NAME}`.")
+    implemented_divide = code.replace(
         """
-def subtract(x, y):
-    return x + y
+def divide(x, y):
+    return "Hello World"
 """,
         """
-def subtract(x, y):
-    return x - y
+def divide(x, y):
+    return x / y
 """,
     )
-    codefile.write_text(implemented_subtract)
+    codefile.write_text(implemented_divide)
 
     res = subprocess.run(["git", "add", FILE_NAME], capture_output=True)
     if res.returncode != 0:
@@ -85,6 +90,15 @@ def subtract(x, y):
     if res.returncode != 0:
         raise setup_exercise.SetupError("Failed to commit to branch.")
 
+    # Push local branch
+    cli.info(f"Pushing {BRANCH_NAME}.")
+    res = subprocess.run(
+        ["git", "push", "--set-upstream", "origin", BRANCH_NAME], capture_output=True
+    )
+    if res.returncode != 0:
+        raise setup_exercise.SetupError("Failed to push commit.")
+
+    # Back to master
     cli.info("Switching back to master.")
     subprocess.run(["git", "checkout", "master"], capture_output=True)
 
@@ -93,7 +107,7 @@ def subtract(x, y):
 
     cli.info(
         "\nUse `git status`, `git log`, and `git branch` to take a look at what's changed in your local repo.\n"
-        "When you're ready to start the exercise, switch to the `fix-subtract` branch and try to rebase onto master.\n"
+        "When you're ready to start, rebase the `fix-subtract` branch onto master and push it.\n"
     )
 
 
@@ -106,9 +120,15 @@ def reset():
     )
     root_commit = res.stdout.decode("utf-8").strip()
     subprocess.run(["git", "reset", "--hard", root_commit], capture_output=True)
+    # Force push master
+    cli.info("Resetting remote master.")
+    subprocess.run(["git", "push", "--force"], capture_output=True)
     # Delete branch
     cli.info(f"Removing branch `{BRANCH_NAME}`.")
     subprocess.run(["git", "branch", "-D", BRANCH_NAME], capture_output=True)
+    # Delete remote branch
+    cli.info(f"Removing remote branch `{BRANCH_NAME}`.")
+    subprocess.run(["git", "push", "-d", "origin", BRANCH_NAME], capture_output=True)
     # Setup again
     cli.info("Setting up again.")
     setup()
@@ -162,8 +182,8 @@ def verify():
     code = codefile.read_text()
     if (
         """
-def subtract(x, y):
-    return x - y"""
+def divide(x, y):
+    return x / y"""
         not in code
     ):
         raise verifier.VerifyError(
@@ -172,5 +192,8 @@ def subtract(x, y):
             'Take another look at "Fix the Merge Conflict".\n'
             "Run `gsc reset` and try again."
         )
+
+    # We should be up to date with the remote.
+    utils.assert_up_to_date_with_remote(BRANCH_NAME)
 
     cli.success("Done.")

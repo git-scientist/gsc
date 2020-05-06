@@ -2,6 +2,7 @@ import os
 import pathlib
 from gsc import cli
 import gsc.exercises.sync_error, gsc.exercises.merge_conflict, gsc.exercises.multiple_remotes
+import gsc.exercises.use_the_force
 
 
 class ResetError(Exception):
@@ -26,5 +27,7 @@ def reset():
         gsc.exercises.merge_conflict.reset()
     if gsc_id == "multiple_remotes":
         gsc.exercises.multiple_remotes.reset()
+    if gsc_id == "use_the_force":
+        gsc.exercises.use_the_force.reset()
     else:
         raise ResetError("Unknown Git Scientist exercise. Try upgrading gsc.")
