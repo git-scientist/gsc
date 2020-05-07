@@ -1,8 +1,13 @@
 import os
 import pathlib
 from gsc import cli
-import gsc.exercises.push_and_pull, gsc.exercises.sync_error, gsc.exercises.merge_conflict
-import gsc.exercises.multiple_remotes, gsc.exercises.use_the_force
+from gsc.exercises import (
+    push_and_pull,
+    sync_error,
+    merge_conflict,
+    multiple_remotes,
+    use_the_force,
+)
 
 
 class SetupError(Exception):
@@ -29,14 +34,14 @@ def setup(gsc_id: str):
     cli.info(f"Setting up {gsc_id}")
 
     if gsc_id == "push_and_pull":
-        gsc.exercises.push_and_pull.setup()
+        push_and_pull.setup()
     elif gsc_id == "sync_error":
-        gsc.exercises.sync_error.setup()
+        sync_error.setup()
     elif gsc_id == "merge_conflict":
-        gsc.exercises.merge_conflict.setup()
+        merge_conflict.setup()
     elif gsc_id == "multiple_remotes":
-        gsc.exercises.multiple_remotes.setup()
+        multiple_remotes.setup()
     elif gsc_id == "use_the_force":
-        gsc.exercises.use_the_force.setup()
+        use_the_force.setup()
     else:
         raise SetupError("Unknown Git Scientist exercise. Try upgrading gsc.")
