@@ -11,6 +11,7 @@ from gsc.exercises import (
     use_the_force,
     revert,
     reset_file,
+    amend,
 )
 
 
@@ -57,6 +58,8 @@ def verify(exercise: str = None):
         revert.verify()
     elif gsc_id == "reset_file":
         reset_file.verify()
+    elif gsc_id == "amend":
+        amend.verify()
     else:
         raise VerifyError("Unknown Git Scientist exercise. Try upgrading gsc.")
     client.complete_exercise(gsc_id)

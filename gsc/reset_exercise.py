@@ -8,6 +8,7 @@ from gsc.exercises import (
     use_the_force,
     revert,
     reset_file,
+    amend,
 )
 
 
@@ -39,5 +40,7 @@ def reset():
         revert.reset()
     if gsc_id == "reset_file":
         reset_file.reset()
+    if gsc_id == "amend":
+        amend.reset()
     else:
         raise ResetError("Unknown Git Scientist exercise. Try upgrading gsc.")
