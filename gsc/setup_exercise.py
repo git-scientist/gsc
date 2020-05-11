@@ -8,6 +8,7 @@ from gsc.exercises import (
     multiple_remotes,
     use_the_force,
     revert,
+    reset_file,
 )
 
 
@@ -46,5 +47,7 @@ def setup(gsc_id: str):
         use_the_force.setup()
     elif gsc_id == "revert":
         revert.setup()
+    elif gsc_id == "reset_file":
+        reset_file.setup()
     else:
         raise SetupError("Unknown Git Scientist exercise. Try upgrading gsc.")
