@@ -53,6 +53,13 @@ def most_recent_commit_message() -> str:
     return remove_hash(res.stdout.decode("utf-8"))
 
 
+def most_recent_commit_description() -> str:
+    res = subprocess.run(["git", "log", "-1", "--pretty=%B"], capture_output=True)
+    commit_msg = res.stdout.decode("utf-8").strip()
+    [_title, desc] = commit_msg.split("\n\n", 1)
+    return desc
+
+
 def commit_messages() -> t.List[str]:
     res = subprocess.run(["git", "log", "--oneline"], capture_output=True)
     msgs = res.stdout.decode("utf-8").split("\n")[:-1]

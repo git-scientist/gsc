@@ -9,6 +9,7 @@ from gsc.exercises import (
     merge_conflict,
     multiple_remotes,
     use_the_force,
+    revert,
 )
 
 
@@ -51,6 +52,8 @@ def verify(exercise: str = None):
         multiple_remotes.verify()
     elif gsc_id == "use_the_force":
         use_the_force.verify()
+    elif gsc_id == "revert":
+        revert.verify()
     else:
         raise VerifyError("Unknown Git Scientist exercise. Try upgrading gsc.")
     client.complete_exercise(gsc_id)
