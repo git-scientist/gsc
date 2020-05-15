@@ -1,8 +1,7 @@
-import shutil
 import pathlib
 import subprocess
 
-from gsc import verifier, cli, setup_exercise
+from gsc import verifier, cli
 from gsc.exercises import utils
 
 REVERT_HASH = "67a6501a99ef70b8d554e2b11357740cb1f9b8a0"

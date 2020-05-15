@@ -1,10 +1,6 @@
-import json
-import shutil
-import pathlib
 import subprocess
 
-from gsc import verifier, cli, setup_exercise
-from gsc.exercises import utils
+from gsc import verifier, cli
 
 UPSTREAM_URL = "https://github.com/git-scientist/fork-this"
 UPSTREAM_URL_GIT = UPSTREAM_URL + ".git"

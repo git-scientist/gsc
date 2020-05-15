@@ -1,9 +1,8 @@
 import json
-import shutil
 import pathlib
 import subprocess
 
-from gsc import verifier, cli, setup_exercise
+from gsc import verifier, cli
 from gsc.exercises import utils
 
 FILE_NAME = "useful_things.py"
