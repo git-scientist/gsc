@@ -26,7 +26,7 @@ def verify(exercise: str = None):
             raise VerifyError("This is not a git repo.")
 
     if exercise == "ssh":
-        cli.title(f"Verifying ssh")
+        cli.title("Verifying ssh")
         ssh_clone.verify()
         client.complete_exercise("ssh_clone")
         return

@@ -30,17 +30,17 @@ def reset():
 
     if gsc_id == "sync_error":
         sync_error.reset()
-    if gsc_id == "merge_conflict":
+    elif gsc_id == "merge_conflict":
         merge_conflict.reset()
-    if gsc_id == "multiple_remotes":
+    elif gsc_id == "multiple_remotes":
         multiple_remotes.reset()
-    if gsc_id == "use_the_force":
+    elif gsc_id == "use_the_force":
         use_the_force.reset()
-    if gsc_id == "revert":
+    elif gsc_id == "revert":
         revert.reset()
-    if gsc_id == "reset_file":
+    elif gsc_id == "reset_file":
         reset_file.reset()
-    if gsc_id == "amend":
+    elif gsc_id == "amend":
         amend.reset()
     else:
         raise ResetError("Unknown Git Scientist exercise. Try upgrading gsc.")
