@@ -1,5 +1,4 @@
 import json
-import shutil
 import pathlib
 import subprocess
 
@@ -9,7 +8,7 @@ from gsc.exercises import utils
 MASTER_COMMIT_MSG = "Fix divide function for some numbers"
 BRANCH_COMMIT_MSG = "Fix divide function for all numbers"
 FILE_NAME = "useful_things.py"
-BRANCH_NAME = "fix-subtract"
+BRANCH_NAME = "fix-divide"
 
 
 def setup():
@@ -107,7 +106,7 @@ def divide(x, y):
 
     cli.info(
         "\nUse `git status`, `git log`, and `git branch` to take a look at what's changed in your local repo.\n"
-        "When you're ready to start, rebase the `fix-subtract` branch onto master and push it.\n"
+        f"When you're ready to start, rebase the `{BRANCH_NAME}` branch onto master and push it.\n"
     )
 
 
