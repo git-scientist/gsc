@@ -2,6 +2,7 @@ import json
 import shutil
 import pathlib
 import subprocess
+from subprocess import PIPE
 
 from gsc import verifier, cli, setup_exercise
 from gsc.exercises import utils
@@ -33,23 +34,23 @@ def subtract(x, y):
     )
     codefile.write_text(implemented_subtract)
 
-    res = subprocess.run(["git", "add", FILE_NAME], capture_output=True)
+    res = subprocess.run(["git", "add", FILE_NAME], stdout=PIPE, stderr=PIPE)
     if res.returncode != 0:
         raise setup_exercise.SetupError("Failed to add first code change.")
 
     res = subprocess.run(
-        ["git", "commit", "-m", REMOTE_COMMIT_MSG], capture_output=True
+        ["git", "commit", "-m", REMOTE_COMMIT_MSG], stdout=PIPE, stderr=PIPE
     )
     if res.returncode != 0:
         raise setup_exercise.SetupError("Failed to commit first code change.")
 
-    res = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True)
+    res = subprocess.run(["git", "rev-parse", "HEAD"], stdout=PIPE, stderr=PIPE)
     if res.returncode != 0:
         raise setup_exercise.SetupError("Failed to get hash of first commit.")
     state["remote_hash"] = res.stdout.decode("utf-8").strip()
 
     cli.info("Pushing the commit.")
-    res = subprocess.run(["git", "push"], capture_output=True)
+    res = subprocess.run(["git", "push"], stdout=PIPE, stderr=PIPE)
     if res.returncode != 0:
         raise setup_exercise.SetupError("Failed to push commit.")
 
@@ -73,11 +74,13 @@ def divide(x, y):
     )
     codefile.write_text(implemented_divide)
 
-    res = subprocess.run(["git", "add", FILE_NAME], capture_output=True)
+    res = subprocess.run(["git", "add", FILE_NAME], stdout=PIPE, stderr=PIPE)
     if res.returncode != 0:
         raise setup_exercise.SetupError("Failed to add second code change.")
 
-    res = subprocess.run(["git", "commit", "-m", LOCAL_COMMIT_MSG], capture_output=True)
+    res = subprocess.run(
+        ["git", "commit", "-m", LOCAL_COMMIT_MSG], stdout=PIPE, stderr=PIPE
+    )
     if res.returncode != 0:
         raise setup_exercise.SetupError("Failed to commit second code change.")
 
@@ -94,13 +97,13 @@ def reset():
     # Reset back to inital commit.
     cli.info("Rewinding history.")
     res = subprocess.run(
-        ["git", "rev-list", "--max-parents=0", "HEAD"], capture_output=True
+        ["git", "rev-list", "--max-parents=0", "HEAD"], stdout=PIPE, stderr=PIPE
     )
     root_commit = res.stdout.decode("utf-8").strip()
-    subprocess.run(["git", "reset", "--hard", root_commit], capture_output=True)
+    subprocess.run(["git", "reset", "--hard", root_commit], stdout=PIPE, stderr=PIPE)
     # Force push
     cli.info("Cleaning remote repo.")
-    subprocess.run(["git", "push", "--force"], capture_output=True)
+    subprocess.run(["git", "push", "--force"], stdout=PIPE, stderr=PIPE)
     # Setup again
     cli.info("Setting up again.")
     setup()
@@ -121,7 +124,7 @@ def verify():
     state = json.loads(pathlib.Path(".gsc_state").read_text())
 
     # Get commit hashes
-    res = subprocess.run(["git", "rev-list", "--all"], capture_output=True)
+    res = subprocess.run(["git", "rev-list", "--all"], stdout=PIPE, stderr=PIPE)
     commit_hashes = res.stdout.decode("utf-8").strip().split("\n")
 
     # We should have the remote commit

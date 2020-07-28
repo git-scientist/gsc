@@ -1,4 +1,5 @@
 import subprocess
+from subprocess import PIPE
 
 from gsc import verifier, cli
 from gsc.exercises import utils
@@ -19,7 +20,8 @@ def verify():
     # We should be one commit ahead of remote master
     res = subprocess.run(
         ["git", "rev-list", "--left-right", "--count", "master...origin/master"],
-        capture_output=True,
+        stdout=PIPE,
+        stderr=PIPE,
     )
     res = res.stdout.decode("utf-8").strip().split("\t")
     if ["1", "0"] != res:

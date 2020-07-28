@@ -1,5 +1,6 @@
 import pathlib
 import subprocess
+from subprocess import PIPE
 
 from gsc import verifier, cli
 from gsc.exercises import utils
@@ -13,9 +14,11 @@ def setup():
 
 
 def reset():
-    subprocess.run(["git", "checkout", "master"], capture_output=True)
+    subprocess.run(["git", "checkout", "master"], stdout=PIPE, stderr=PIPE)
     # Reset to origin/master
-    subprocess.run(["git", "reset", "--hard", "origin/master"], capture_output=True)
+    subprocess.run(
+        ["git", "reset", "--hard", "origin/master"], stdout=PIPE, stderr=PIPE
+    )
 
 
 def verify():

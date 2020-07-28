@@ -1,5 +1,6 @@
 import pathlib
 import subprocess
+from subprocess import PIPE
 
 from gsc import verifier, cli, setup_exercise
 from gsc.exercises import utils
@@ -10,7 +11,7 @@ MASTER_COMMIT_MSG = "Fix the subtract function"
 
 def setup():
     # Make sure we're on the master branch
-    subprocess.run(["git", "checkout", "master"], capture_output=True)
+    subprocess.run(["git", "checkout", "master"], stdout=PIPE, stderr=PIPE)
 
     # Commit a change which needs to be amended
     codefile = pathlib.Path(FILE_NAME)
@@ -28,12 +29,12 @@ def subtract(x, y):
     )
     codefile.write_text(changed)
 
-    res = subprocess.run(["git", "add", FILE_NAME], capture_output=True)
+    res = subprocess.run(["git", "add", FILE_NAME], stdout=PIPE, stderr=PIPE)
     if res.returncode != 0:
         raise setup_exercise.SetupError("Failed to add code change to master.")
 
     res = subprocess.run(
-        ["git", "commit", "-m", MASTER_COMMIT_MSG], capture_output=True
+        ["git", "commit", "-m", MASTER_COMMIT_MSG], stdout=PIPE, stderr=PIPE
     )
     if res.returncode != 0:
         raise setup_exercise.SetupError("Failed to commit to master.")
@@ -45,8 +46,10 @@ def subtract(x, y):
 
 
 def reset():
-    subprocess.run(["git", "checkout", "master"], capture_output=True)
-    subprocess.run(["git", "reset", "--hard", "origin/master"], capture_output=True)
+    subprocess.run(["git", "checkout", "master"], stdout=PIPE, stderr=PIPE)
+    subprocess.run(
+        ["git", "reset", "--hard", "origin/master"], stdout=PIPE, stderr=PIPE
+    )
     cli.info("Setting up again.")
     setup()
 

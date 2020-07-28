@@ -1,10 +1,11 @@
 import subprocess
+from subprocess import PIPE
 
 from gsc import verifier, cli
 
 
 def verify():
-    res = subprocess.run(["git", "remote", "-v"], capture_output=True)
+    res = subprocess.run(["git", "remote", "-v"], stdout=PIPE, stderr=PIPE)
     res = res.stdout.decode("utf-8").strip()
 
     if "git@github.com:" not in res:

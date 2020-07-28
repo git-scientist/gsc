@@ -1,6 +1,7 @@
 import json
 import pathlib
 import subprocess
+from subprocess import PIPE
 
 from gsc import verifier, cli
 from gsc.exercises import utils
@@ -10,7 +11,7 @@ FILE_NAME = "useful_things.py"
 
 def setup():
     # Make sure we're on the master branch
-    subprocess.run(["git", "checkout", "master"], capture_output=True)
+    subprocess.run(["git", "checkout", "master"], stdout=PIPE, stderr=PIPE)
 
     # Make an uncommitted file change
     codefile = pathlib.Path(FILE_NAME)
@@ -32,9 +33,11 @@ def subtract(x, y):
 
 
 def reset():
-    subprocess.run(["git", "checkout", "master"], capture_output=True)
+    subprocess.run(["git", "checkout", "master"], stdout=PIPE, stderr=PIPE)
     # Reset to origin/master
-    subprocess.run(["git", "reset", "--hard", "origin/master"], capture_output=True)
+    subprocess.run(
+        ["git", "reset", "--hard", "origin/master"], stdout=PIPE, stderr=PIPE
+    )
     cli.info("Setting up again.")
     setup()
 

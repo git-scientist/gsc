@@ -1,4 +1,5 @@
 import subprocess
+from subprocess import PIPE
 
 from gsc import verifier, cli
 
@@ -16,7 +17,7 @@ def reset():
 
 def verify():
     # We should have an origin remote with a fork url
-    res = subprocess.run(["git", "remote", "-v"], capture_output=True)
+    res = subprocess.run(["git", "remote", "-v"], stdout=PIPE, stderr=PIPE)
     if res.returncode != 0:
         raise verifier.VerifyError("Failed to list remote repos")
 

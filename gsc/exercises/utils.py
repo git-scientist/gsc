@@ -2,6 +2,7 @@ import os
 import stat
 import shutil
 import subprocess
+from subprocess import PIPE
 import typing as t
 from gsc import cli, verifier
 
@@ -14,24 +15,25 @@ def pluralise_commits(number: str) -> str:
 
 
 def clean_status() -> bool:
-    res = subprocess.run(["git", "status", "--porcelain"], capture_output=True)
+    res = subprocess.run(["git", "status", "--porcelain"], stdout=PIPE, stderr=PIPE)
     return res.stdout.decode("utf-8").strip() == ""
 
 
 def on_branch(branch: str) -> bool:
-    res = subprocess.run(["git", "branch"], capture_output=True)
+    res = subprocess.run(["git", "branch"], stdout=PIPE, stderr=PIPE)
     return b"* " + branch.encode("utf-8") in res.stdout
 
 
 def tests_pass() -> bool:
-    res = subprocess.run(["pytest"], capture_output=True)
+    res = subprocess.run(["pytest"], stdout=PIPE, stderr=PIPE)
     return res.returncode == 0
 
 
 def assert_up_to_date_with_remote(branch: str) -> None:
     res = subprocess.run(
         ["git", "rev-list", "--left-right", "--count", f"{branch}...origin/{branch}"],
-        capture_output=True,
+        stdout=PIPE,
+        stderr=PIPE,
     )
     commits = res.stdout.decode("utf-8").strip().split("\t")
     if ["0", "0"] != commits:
@@ -49,19 +51,19 @@ def remove_hash(msg: str) -> str:
 
 
 def most_recent_commit_message() -> str:
-    res = subprocess.run(["git", "log", "-1", "--oneline"], capture_output=True)
+    res = subprocess.run(["git", "log", "-1", "--oneline"], stdout=PIPE, stderr=PIPE)
     return remove_hash(res.stdout.decode("utf-8"))
 
 
 def most_recent_commit_description() -> str:
-    res = subprocess.run(["git", "log", "-1", "--pretty=%B"], capture_output=True)
+    res = subprocess.run(["git", "log", "-1", "--pretty=%B"], stdout=PIPE, stderr=PIPE)
     commit_msg = res.stdout.decode("utf-8").strip()
     [_title, desc] = commit_msg.split("\n\n", 1)
     return desc
 
 
 def commit_messages() -> t.List[str]:
-    res = subprocess.run(["git", "log", "--oneline"], capture_output=True)
+    res = subprocess.run(["git", "log", "--oneline"], stdout=PIPE, stderr=PIPE)
     msgs = res.stdout.decode("utf-8").split("\n")[:-1]
     return list(map(remove_hash, msgs))
 

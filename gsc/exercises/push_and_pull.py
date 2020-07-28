@@ -2,6 +2,7 @@ import os
 import typer
 import shutil
 import subprocess
+from subprocess import PIPE
 
 from gsc import verifier, cli, setup_exercise
 from gsc.exercises import utils
@@ -31,11 +32,11 @@ def setup():
     with open(".gsc_id", "w") as f:
         f.write("push_and_pull")
 
-    res = subprocess.run(["git", "add", ".gsc_id"], capture_output=True)
+    res = subprocess.run(["git", "add", ".gsc_id"], stdout=PIPE, stderr=PIPE)
     if res.returncode != 0:
         raise setup_exercise.SetupError("Failed to add gsc_id. Contact us for help.")
 
-    res = subprocess.run(["git", "commit", "-m", COMMIT_MSG], capture_output=True)
+    res = subprocess.run(["git", "commit", "-m", COMMIT_MSG], stdout=PIPE, stderr=PIPE)
     if res.returncode != 0:
         raise setup_exercise.SetupError(
             "Failed to setup Git Scientist. Contact us for help."

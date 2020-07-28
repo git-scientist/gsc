@@ -1,6 +1,7 @@
 import json
 import pathlib
 import subprocess
+from subprocess import PIPE
 
 from gsc import verifier, cli, setup_exercise
 from gsc.exercises import utils
@@ -14,9 +15,9 @@ BRANCH_NAME = "fix-divide"
 def setup():
     state = {}
     # Make sure we're on the master branch
-    subprocess.run(["git", "checkout", "master"], capture_output=True)
+    subprocess.run(["git", "checkout", "master"], stdout=PIPE, stderr=PIPE)
     # Create branch
-    res = subprocess.run(["git", "branch", BRANCH_NAME], capture_output=True)
+    res = subprocess.run(["git", "branch", BRANCH_NAME], stdout=PIPE, stderr=PIPE)
     if res.returncode != 0:
         raise setup_exercise.SetupError(
             f"Failed to create branch `{BRANCH_NAME}`. Run `gsc reset`."
@@ -40,30 +41,30 @@ def divide(x, y):
     )
     codefile.write_text(implemented_divide)
 
-    res = subprocess.run(["git", "add", FILE_NAME], capture_output=True)
+    res = subprocess.run(["git", "add", FILE_NAME], stdout=PIPE, stderr=PIPE)
     if res.returncode != 0:
         raise setup_exercise.SetupError("Failed to add code change to master.")
 
     res = subprocess.run(
-        ["git", "commit", "-m", MASTER_COMMIT_MSG], capture_output=True
+        ["git", "commit", "-m", MASTER_COMMIT_MSG], stdout=PIPE, stderr=PIPE
     )
     if res.returncode != 0:
         raise setup_exercise.SetupError("Failed to commit to master.")
 
-    res = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True)
+    res = subprocess.run(["git", "rev-parse", "HEAD"], stdout=PIPE, stderr=PIPE)
     if res.returncode != 0:
         raise setup_exercise.SetupError("Failed to get hash of commit on master.")
     state["master_hash"] = res.stdout.decode("utf-8").strip()
 
     # Push master branch
     cli.info("Pushing master.")
-    res = subprocess.run(["git", "push"], capture_output=True)
+    res = subprocess.run(["git", "push"], stdout=PIPE, stderr=PIPE)
     if res.returncode != 0:
         raise setup_exercise.SetupError("Failed to push commit.")
 
     # Switch branch
     cli.info("Switching branch.")
-    subprocess.run(["git", "checkout", BRANCH_NAME], capture_output=True)
+    subprocess.run(["git", "checkout", BRANCH_NAME], stdout=PIPE, stderr=PIPE)
 
     # Create local commit
     cli.info(f"Implementing the divide function correctly on branch `{BRANCH_NAME}`.")
@@ -79,12 +80,12 @@ def divide(x, y):
     )
     codefile.write_text(implemented_divide)
 
-    res = subprocess.run(["git", "add", FILE_NAME], capture_output=True)
+    res = subprocess.run(["git", "add", FILE_NAME], stdout=PIPE, stderr=PIPE)
     if res.returncode != 0:
         raise setup_exercise.SetupError("Failed to add code change to branch.")
 
     res = subprocess.run(
-        ["git", "commit", "-m", BRANCH_COMMIT_MSG], capture_output=True
+        ["git", "commit", "-m", BRANCH_COMMIT_MSG], stdout=PIPE, stderr=PIPE
     )
     if res.returncode != 0:
         raise setup_exercise.SetupError("Failed to commit to branch.")
@@ -92,14 +93,16 @@ def divide(x, y):
     # Push local branch
     cli.info(f"Pushing {BRANCH_NAME}.")
     res = subprocess.run(
-        ["git", "push", "--set-upstream", "origin", BRANCH_NAME], capture_output=True
+        ["git", "push", "--set-upstream", "origin", BRANCH_NAME],
+        stdout=PIPE,
+        stderr=PIPE,
     )
     if res.returncode != 0:
         raise setup_exercise.SetupError("Failed to push commit.")
 
     # Back to master
     cli.info("Switching back to master.")
-    subprocess.run(["git", "checkout", "master"], capture_output=True)
+    subprocess.run(["git", "checkout", "master"], stdout=PIPE, stderr=PIPE)
 
     # Stash master commit hash for verification later
     pathlib.Path(".gsc_state").write_text(json.dumps(state))
@@ -111,23 +114,25 @@ def divide(x, y):
 
 
 def reset():
-    subprocess.run(["git", "checkout", "master"], capture_output=True)
+    subprocess.run(["git", "checkout", "master"], stdout=PIPE, stderr=PIPE)
     # Reset back to inital commit.
     cli.info("Rewinding history.")
     res = subprocess.run(
-        ["git", "rev-list", "--max-parents=0", "HEAD"], capture_output=True
+        ["git", "rev-list", "--max-parents=0", "HEAD"], stdout=PIPE, stderr=PIPE
     )
     root_commit = res.stdout.decode("utf-8").strip()
-    subprocess.run(["git", "reset", "--hard", root_commit], capture_output=True)
+    subprocess.run(["git", "reset", "--hard", root_commit], stdout=PIPE, stderr=PIPE)
     # Force push master
     cli.info("Resetting remote master.")
-    subprocess.run(["git", "push", "--force"], capture_output=True)
+    subprocess.run(["git", "push", "--force"], stdout=PIPE, stderr=PIPE)
     # Delete branch
     cli.info(f"Removing branch `{BRANCH_NAME}`.")
-    subprocess.run(["git", "branch", "-D", BRANCH_NAME], capture_output=True)
+    subprocess.run(["git", "branch", "-D", BRANCH_NAME], stdout=PIPE, stderr=PIPE)
     # Delete remote branch
     cli.info(f"Removing remote branch `{BRANCH_NAME}`.")
-    subprocess.run(["git", "push", "-d", "origin", BRANCH_NAME], capture_output=True)
+    subprocess.run(
+        ["git", "push", "-d", "origin", BRANCH_NAME], stdout=PIPE, stderr=PIPE
+    )
     # Setup again
     cli.info("Setting up again.")
     setup()
@@ -142,7 +147,7 @@ def verify():
     state = json.loads(pathlib.Path(".gsc_state").read_text())
 
     # We should have the branch
-    res = subprocess.run(["git", "checkout", BRANCH_NAME], capture_output=True)
+    res = subprocess.run(["git", "checkout", BRANCH_NAME], stdout=PIPE, stderr=PIPE)
     if res.returncode != 0:
         raise verifier.VerifyError(
             f'The "{BRANCH_NAME}" branch has been deleted!\n'
@@ -150,7 +155,7 @@ def verify():
         )
 
     # Get commit hashes
-    res = subprocess.run(["git", "rev-list", "--all"], capture_output=True)
+    res = subprocess.run(["git", "rev-list", "--all"], stdout=PIPE, stderr=PIPE)
     commit_hashes = res.stdout.decode("utf-8").strip().split("\n")
 
     # We should have the master commit
