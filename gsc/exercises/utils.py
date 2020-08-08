@@ -68,6 +68,11 @@ def commit_messages() -> t.List[str]:
     return list(map(remove_hash, msgs))
 
 
+def commit_hashes() -> t.List[str]:
+    res = subprocess.run(["git", "log", "--format=%H"], stdout=PIPE, stderr=PIPE)
+    return res.stdout.decode("utf-8").strip().split("\n")
+
+
 def check_commit_message(msg: str) -> None:
     cli.info(f"Checking commit message: {msg}")
 

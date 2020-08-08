@@ -123,10 +123,7 @@ def verify():
 
     state = json.loads(pathlib.Path(".gsc_state").read_text())
 
-    # Get commit hashes
-    res = subprocess.run(["git", "rev-list", "--all"], stdout=PIPE, stderr=PIPE)
-    commit_hashes = res.stdout.decode("utf-8").strip().split("\n")
-
+    commit_hashes = utils.commit_hashes()
     # We should have the remote commit
     if state["remote_hash"] not in commit_hashes:
         raise verifier.VerifyError(

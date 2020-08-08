@@ -154,10 +154,7 @@ def verify():
             "Run `gsc reset` to start again."
         )
 
-    # Get commit hashes
-    res = subprocess.run(["git", "rev-list", "--all"], stdout=PIPE, stderr=PIPE)
-    commit_hashes = res.stdout.decode("utf-8").strip().split("\n")
-
+    commit_hashes = utils.commit_hashes()
     # We should have the master commit
     if state["master_hash"] not in commit_hashes:
         raise verifier.VerifyError(
