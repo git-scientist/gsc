@@ -36,4 +36,6 @@ def api_error(sc: int) -> APIError:
         return APIError("Not found.")
     elif sc == 500:
         return APIError("Server error.")
+    elif sc == 400:
+        return APIError("Please update gsc.\nUse `pip install --force gsc`.")
     return APIError(f"Request failed with code {sc}")
