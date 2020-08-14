@@ -31,7 +31,7 @@ def login(email: str = typer.Option(..., prompt=True)):
     try:
         auth.login(email)
         success("Login Success.")
-    except auth.AuthenticationError as e:
+    except auth.LoginError as e:
         error(str(e))
 
 

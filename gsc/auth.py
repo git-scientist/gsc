@@ -1,9 +1,8 @@
 import os
 import json
 import pathlib
-import requests
-import http.server
-import urllib.parse
+import asyncio
+import websockets
 import typing as t
 
 from gsc import cli
@@ -16,13 +15,13 @@ GSC_DIR = HOME + "/.gitscientist/"
 GSC_TOKEN = GSC_DIR + ".gsc_token"
 
 if os.getenv("GSC_ENV") == "dev":
-    BASE_URL = "http://localhost:4000"
+    BASE_URL = "ws://localhost:4000"
 else:
-    BASE_URL = "https://www.gitscientist.com"
+    BASE_URL = "ws://www.gitscientist.com"
 API_URL = BASE_URL + "/api"
 
 
-class NoUserError(Exception):
+class LoginError(Exception):
     pass
 
 
@@ -30,55 +29,47 @@ class AuthenticationError(Exception):
     pass
 
 
-class TokenHandler(http.server.BaseHTTPRequestHandler):
-    def do_GET(self):
-        parsed_path = urllib.parse.urlparse(self.path)
+async def handle_login(email: str):
+    url = BASE_URL + "/socket/websocket"
+    async with websockets.connect(url) as websocket:
+        login_msg = {
+            "topic": "login",
+            "event": "phx_join",
+            "payload": {"email": email},
+            "ref": "",
+        }
+        await websocket.send(json.dumps(login_msg))
 
-        res = requests.get(API_URL + parsed_path.path)
+        while True:
+            raw = await websocket.recv()
+            resp = json.loads(raw)
+            event = resp["event"]
+            if event == "phx_reply":
+                if resp["payload"]["status"] == "ok":
+                    cli.info("We sent you an email. Click the link inside to log in.")
+                else:
+                    raise LoginError(
+                        "Login failed unexpectedly.\n"
+                        f'Response: {json.dumps(resp["payload"]["response"])}\n'
+                        "Contact us if this error persists."
+                    )
+                    break
 
-        self.send_response(302)
+            elif event == "login_success":
+                session_unique_id = resp["payload"]["session_unique_id"]
+                with open(GSC_TOKEN, "w") as f:
+                    f.write(session_unique_id)
+                break
 
-        if not os.path.exists(GSC_DIR):
-            os.makedirs(GSC_DIR)
-
-        if res.status_code == 200:
-            session_unique_id = json.loads(res.text)["session_unique_id"]
-
-            with open(GSC_TOKEN, "w") as f:
-                f.write(session_unique_id)
-
-            self.send_header("Location", BASE_URL + "/login-success")
-        else:
-            try:
-                os.remove(GSC_TOKEN)
-            except OSError:
-                pass
-
-            self.send_header("Location", BASE_URL + "/login-failure")
-
-        self.end_headers()
-
-    def log_message(self, format, *args):
-        return
+            elif event == "error":
+                raise LoginError(
+                    f'Login failed.\nReason: {resp["payload"]["reason"]}\n'
+                )
+                break
 
 
 def login(email: str):
-    res = requests.post(API_URL + "/login", data={"email": email})
-
-    if res.status_code != 200:
-        raise AuthenticationError("User not found.")
-
-    cli.info("We sent you an email. Click the link inside to login.")
-
-    # Start a localhost HTTP server to wait for the email verification token.
-    server = http.server.HTTPServer(("", LOCAL_PORT), TokenHandler)
-    server.handle_request()
-
-    # Check for new token to see if we logged in successfully
-    try:
-        get_token()
-    except AuthenticationError:
-        raise AuthenticationError("Login Failed.")
+    asyncio.get_event_loop().run_until_complete(handle_login(email))
 
 
 def get_token() -> str:
