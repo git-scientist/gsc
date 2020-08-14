@@ -9,9 +9,11 @@ homepage = "https://www.gitscientist.com"
 repository = "https://github.com/git-scientist/gsc"
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.6.1"
 typer = "^0.1.1"
-requests = "^2.23.0"
+asyncio = "^3.4.3"
+websockets = "^8.1"
+requests = "^2.24.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
