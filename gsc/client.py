@@ -1,6 +1,9 @@
 import os
+import json
 import requests
-from gsc import auth
+import typing as t
+
+from gsc import auth, cli, verifier
 
 
 if os.getenv("GSC_ENV") == "dev":
@@ -21,12 +24,26 @@ def ping() -> str:
     raise api_error(res.status_code)
 
 
-def complete_exercise(id: str) -> str:
+def verify(id: str, payload: t.Dict[str, str]) -> str:
     cookies = auth.cookies()
-    res = requests.get(API_URL + "/complete-exercise/" + id, cookies=cookies)
+    res = requests.post(API_URL + "/verify/" + id, json=payload, cookies=cookies)
     if res.status_code == 200:
-        return res.text
+        reply = json.loads(res.text)
+        if reply["status"] == "ok":
+            handle_warnings(reply)
+            cli.success("Looks good.")
+            return "Exercise complete"
+        elif reply["status"] == "failed_verification":
+            raise verifier.VerifyError(reply["msg"])
+        elif reply["status"] == "error":
+            raise APIError(reply["msg"])
+        else:
+            raise APIError("Unexpected API response. Try updating gsc.")
     raise api_error(res.status_code)
+
+
+def handle_warnings(reply: t.Dict[str, str]) -> None:
+    map(cli.warn, reply["warnings"])
 
 
 def api_error(sc: int) -> APIError:

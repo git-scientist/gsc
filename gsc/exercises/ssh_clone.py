@@ -1,14 +1,8 @@
-import subprocess
-from subprocess import PIPE
-
-from gsc import verifier, cli
+from gsc import client
+from gsc.exercises import utils
 
 
 def verify():
-    res = subprocess.run(["git", "remote", "-v"], stdout=PIPE, stderr=PIPE)
-    res = res.stdout.decode("utf-8").strip()
+    payload = {"git remote -v": utils.git_remote()}
 
-    if "git@github.com:" not in res:
-        raise verifier.VerifyError("Repo not cloned using SSH.")
-
-    cli.success("Looks good.")
+    client.verify("ssh_clone", payload)

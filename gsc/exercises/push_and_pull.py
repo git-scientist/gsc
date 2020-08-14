@@ -4,7 +4,7 @@ import shutil
 import subprocess
 from subprocess import PIPE
 
-from gsc import verifier, cli, setup_exercise
+from gsc import cli, client, setup_exercise
 from gsc.exercises import utils
 
 COMMIT_MSG = "Setup Git Scientist Exercise"
@@ -44,17 +44,6 @@ def setup():
 
 
 def verify():
-    if not utils.clean_status():
-        raise verifier.VerifyError(
-            "Your git status is not clean. Run `git status` to see the problem."
-        )
-
-    if not utils.on_branch("master"):
-        raise verifier.VerifyError(
-            "You should be on the master branch for this exercise.\n"
-            "Change branch with `git checkout master` and try again."
-        )
-
     cwd = os.getcwd()
     if cwd.endswith(PULL_SUFFIX):
         repo_name = cwd[: -len(PULL_SUFFIX)]
@@ -63,21 +52,20 @@ def verify():
         repo_name = cwd
         pull_repo_name = cwd + PULL_SUFFIX
 
-    # Check that both repos contain the commit we want.
     os.chdir(repo_name)
-    msgs = utils.commit_messages()
-    if COMMIT_MSG not in msgs:
-        raise verifier.VerifyError(
-            "Setup commit not found. Did you run `gsc setup push_and_pull`?"
-        )
+    remote_commit_messages = utils.git_log_oneline_remote()
+    main_commit_messages = utils.git_log_oneline()
 
     os.chdir(pull_repo_name)
-    msgs = utils.commit_messages()
-    if COMMIT_MSG not in msgs:
-        raise verifier.VerifyError(
-            "The commit has not been pulled into your local repo.\n"
-            f"The repo is located at {pull_repo_name}\n"
-            "See the My First Pull section of the lesson."
-        )
+    pull_commit_messages = utils.git_log_oneline()
 
-    cli.success("Done.")
+    payload = {
+        "git status --porcelain": utils.git_status(),
+        "git branch": utils.git_branch(),
+        "git log --oneline origin/master": remote_commit_messages,
+        "main:git log --oneline": main_commit_messages,
+        "pull:git log --oneline": pull_commit_messages,
+        "pull_repo_name": pull_repo_name,
+        "expect_msg": COMMIT_MSG,
+    }
+    client.verify("push_and_pull", payload)

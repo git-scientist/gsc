@@ -3,7 +3,7 @@ import pathlib
 import subprocess
 from subprocess import PIPE
 
-from gsc import verifier, cli, setup_exercise
+from gsc import verifier, cli, client, setup_exercise
 from gsc.exercises import utils
 
 MASTER_COMMIT_MSG = "Fix subtract function for some numbers"
@@ -115,9 +115,15 @@ def reset():
 
 
 def verify():
-    if not utils.clean_status():
+    # TODO: this should be sorted out properly.
+    # We can run git log on the correct branch.
+    # We can check out the file from the correct branch as long as we back it up and restore it
+    # after.
+    # Then we won't need to change branch.
+    # If we're still in the middle of the merge conflict we won't be able to change branch
+    if utils.mid_rebase():
         raise verifier.VerifyError(
-            "Your git status is not clean. Run `git status` to see the problem."
+            "You haven't finished rebasing yet. Run `git status` to see what to do next."
         )
 
     state = json.loads(pathlib.Path(".gsc_state").read_text())
@@ -130,44 +136,25 @@ def verify():
             "Run `gsc reset` to start again."
         )
 
-    commit_hashes = utils.commit_hashes()
-    # We should have the master commit
-    if state["master_hash"] not in commit_hashes:
-        raise verifier.VerifyError(
-            f'The "{MASTER_COMMIT_MSG}" commit is missing!\n'
-            f"It's on the master branch. You need to bring in into the `{BRANCH_NAME}` branch somehow..."
-        )
+    commit_hashes = utils.git_log_hashes()
+    commit_messages = utils.git_log_oneline()
 
-    commit_messages = utils.commit_messages()
-    # We should have the branch commit
-    if BRANCH_COMMIT_MSG not in commit_messages:
-        raise verifier.VerifyError(
-            f'The "{BRANCH_COMMIT_MSG}" commit is missing!\n'
-            "Run `gsc reset` and try again."
-        )
-
-    # We should not have a merge commit
-    if any(["Merge branch" in msg for msg in commit_messages]):
-        raise verifier.VerifyError(
-            "You created a merge commit when you pulled in the remote commit.\n"
-            'Take another look at "Exercise Setup".\n'
-            "Run `gsc reset` and try again."
-        )
-
-    # We should have chosen the correct version of the code in the conflict
     codefile = pathlib.Path(FILE_NAME)
     code = codefile.read_text()
-    if (
-        """
+    correct_code = """
 def subtract(x, y):
     return x - y"""
-        not in code
-    ):
-        raise verifier.VerifyError(
-            "You chose the wrong version of the code when fixing the conflict.\n"
-            "This implementation is broken!\n"
-            'Take another look at "Fix the Merge Conflict".\n'
-            "Run `gsc reset` and try again."
-        )
 
-    cli.success("Done.")
+    payload = {
+        "git status --porcelain": utils.git_status(),
+        "git branch": utils.git_branch(),
+        "branch_name": BRANCH_NAME,
+        "state": state,
+        "git log --format=%H": commit_hashes,
+        "git log --oneline": commit_messages,
+        "master_commit_message": MASTER_COMMIT_MSG,
+        "branch_commit_message": BRANCH_COMMIT_MSG,
+        "code": code,
+        "correct_code": correct_code,
+    }
+    client.verify("merge_conflict", payload)

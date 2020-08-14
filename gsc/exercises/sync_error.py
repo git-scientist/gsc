@@ -4,7 +4,7 @@ import pathlib
 import subprocess
 from subprocess import PIPE
 
-from gsc import verifier, cli, setup_exercise
+from gsc import cli, client, setup_exercise
 from gsc.exercises import utils
 
 REMOTE_COMMIT_MSG = "Implement subtract function"
@@ -110,44 +110,20 @@ def reset():
 
 
 def verify():
-    if not utils.clean_status():
-        raise verifier.VerifyError(
-            "Your git status is not clean. Run `git status` to see the problem."
-        )
-
-    if not utils.on_branch("master"):
-        raise verifier.VerifyError(
-            "You should be on the master branch for this exercise.\n"
-            "Change branch with `git checkout master` and try again."
-        )
-
     state = json.loads(pathlib.Path(".gsc_state").read_text())
+    commit_hashes = utils.git_log_hashes()
+    commit_messages = utils.git_log_oneline()
 
-    commit_hashes = utils.commit_hashes()
-    # We should have the remote commit
-    if state["remote_hash"] not in commit_hashes:
-        raise verifier.VerifyError(
-            f'The "{REMOTE_COMMIT_MSG}" commit is missing!\n'
-            "It's on the remote repo. You need to bring in into your local somehow..."
-        )
-
-    commit_messages = utils.commit_messages()
-    # We should have the local commit
-    if LOCAL_COMMIT_MSG not in commit_messages:
-        raise verifier.VerifyError(
-            f'The "{LOCAL_COMMIT_MSG}" commit is missing!\n'
-            "Run `gsc reset` and try again."
-        )
-
-    # We should not have a merge commit
-    if any(["Merge branch" in msg for msg in commit_messages]):
-        raise verifier.VerifyError(
-            "You created a merge commit when you pulled in the remote commit.\n"
-            'Take another look at "How do we fix a sync error?"\n'
-            "Run `gsc reset` and try again."
-        )
-
-    # We should be up to date with the remote
-    utils.assert_up_to_date_with_remote("master")
-
-    cli.success("Done.")
+    payload = {
+        "git status --porcelain": utils.git_status(),
+        "git branch": utils.git_branch(),
+        "git rev-list --left-right --count master...origin/master": utils.rev_list_count_remote(
+            "master"
+        ),
+        "state": state,
+        "git log --format=%H": commit_hashes,
+        "git log --oneline": commit_messages,
+        "remote_commit_message": REMOTE_COMMIT_MSG,
+        "local_commit_message": LOCAL_COMMIT_MSG,
+    }
+    client.verify("sync_error", payload)

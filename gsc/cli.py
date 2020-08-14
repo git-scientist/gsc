@@ -69,7 +69,6 @@ def reset():
 @app.command()
 def verify(exercise: str = typer.Argument(None)):
     try:
-        client.ping()
         verifier.verify(exercise)
         success("Exercise complete!")
     except verifier.VerifyError as e:

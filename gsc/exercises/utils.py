@@ -3,91 +3,63 @@ import stat
 import shutil
 import subprocess
 from subprocess import PIPE
-import typing as t
-from gsc import cli, verifier
 
 
-def pluralise_commits(number: str) -> str:
-    if number == "1":
-        return "is 1 commit"
-    else:
-        return f"are {number} commits"
-
-
-def clean_status() -> bool:
+def git_status() -> str:
     res = subprocess.run(["git", "status", "--porcelain"], stdout=PIPE, stderr=PIPE)
-    return res.stdout.decode("utf-8").strip() == ""
+    return parse(res)
 
 
-def on_branch(branch: str) -> bool:
+def mid_rebase() -> bool:
+    return "no branch, rebasing" in git_branch()
+
+
+def git_branch() -> str:
     res = subprocess.run(["git", "branch"], stdout=PIPE, stderr=PIPE)
-    return b"* " + branch.encode("utf-8") in res.stdout
+    return parse(res)
 
 
-def tests_pass() -> bool:
-    res = subprocess.run(["pytest"], stdout=PIPE, stderr=PIPE)
-    return res.returncode == 0
+def git_remote() -> str:
+    res = subprocess.run(["git", "remote", "-v"], stdout=PIPE, stderr=PIPE)
+    return parse(res)
 
 
-def assert_up_to_date_with_remote(branch: str) -> None:
+def rev_list_count_remote(branch: str) -> str:
     res = subprocess.run(
         ["git", "rev-list", "--left-right", "--count", f"{branch}...origin/{branch}"],
         stdout=PIPE,
         stderr=PIPE,
     )
-    commits = res.stdout.decode("utf-8").strip().split("\t")
-    if ["0", "0"] != commits:
-        raise verifier.VerifyError(
-            f"There {pluralise_commits(commits[0])} on your local repo which aren't on your remote.\n"
-            f"There {pluralise_commits(commits[1])} on your remote repo which aren't on your local.\n"
-            "Your local and remote repos should have the same commits.\n"
-            "Run `gsc reset` to try again if you aren't sure what's gone wrong."
-        )
+    return parse(res)
 
 
-def remove_hash(msg: str) -> str:
-    chunks = msg.split(" ", 1)[1:]
-    return " ".join(chunks).strip()
-
-
-def most_recent_commit_message() -> str:
+def git_log_last_oneline() -> str:
     res = subprocess.run(["git", "log", "-1", "--oneline"], stdout=PIPE, stderr=PIPE)
-    return remove_hash(res.stdout.decode("utf-8"))
+    return parse(res)
 
 
-def most_recent_commit_description() -> str:
+def git_log_last_pretty() -> str:
     res = subprocess.run(["git", "log", "-1", "--pretty=%B"], stdout=PIPE, stderr=PIPE)
     commit_msg = res.stdout.decode("utf-8").strip()
     [_title, desc] = commit_msg.split("\n\n", 1)
     return desc
 
 
-def commit_messages() -> t.List[str]:
+def git_log_oneline() -> str:
     res = subprocess.run(["git", "log", "--oneline"], stdout=PIPE, stderr=PIPE)
-    msgs = res.stdout.decode("utf-8").split("\n")[:-1]
-    return list(map(remove_hash, msgs))
+    return parse(res)
 
 
-def commit_hashes() -> t.List[str]:
+def git_log_oneline_remote() -> str:
+    res = subprocess.run(
+        ["git", "log", "--oneline", "origin/master"], stdout=PIPE, stderr=PIPE
+    )
+    return parse(res)
+
+
+def git_log_hashes() -> str:
     res = subprocess.run(["git", "log", "--format=%H"], stdout=PIPE, stderr=PIPE)
-    return res.stdout.decode("utf-8").strip().split("\n")
-
-
-def check_commit_message(msg: str) -> None:
-    cli.info(f"Checking commit message: {msg}")
-
-    if msg.endswith("."):
-        cli.warn(
-            "You shouldn't put a full stop at the end of your Git commit messages.\n"
-            "Messages should be concise and not gramatically correct sentences."
-        )
-
-    if len(msg) >= 50:
-        cli.warn(
-            "Git commit messages should be fewer than 50 characters long.\n"
-            f"You've used {len(msg)}.\n"
-            "Try to make your commit messages more concise."
-        )
+    return parse(res)
 
 
 def remove_readonly(func, path, execinfo):
@@ -97,3 +69,7 @@ def remove_readonly(func, path, execinfo):
 
 def rmtree_readonly(root):
     shutil.rmtree(root, onerror=remove_readonly)
+
+
+def parse(res) -> str:
+    return res.stdout.decode("utf-8").strip()
