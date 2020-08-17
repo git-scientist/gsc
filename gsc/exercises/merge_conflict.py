@@ -141,9 +141,6 @@ def verify():
 
     codefile = pathlib.Path(FILE_NAME)
     code = codefile.read_text()
-    correct_code = """
-def subtract(x, y):
-    return x - y"""
 
     payload = {
         "git status --porcelain": utils.git_status(),
@@ -155,6 +152,5 @@ def subtract(x, y):
         "master_commit_message": MASTER_COMMIT_MSG,
         "branch_commit_message": BRANCH_COMMIT_MSG,
         "code": code,
-        "correct_code": correct_code,
     }
     client.verify("merge_conflict", payload)

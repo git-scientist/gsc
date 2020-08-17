@@ -53,9 +53,6 @@ def verify():
     # The code should be the same as in the initial commit
     codefile = pathlib.Path(FILE_NAME)
     code = codefile.read_text()
-    correct_code = """
-def subtract(x, y):
-    return x - y"""
 
     payload = {
         "git status --porcelain": utils.git_status(),
@@ -63,6 +60,5 @@ def subtract(x, y):
         "git log --oneline": commit_messages,
         "state": state,
         "code": code,
-        "correct_code": correct_code,
     }
     client.verify("reset_file", payload)

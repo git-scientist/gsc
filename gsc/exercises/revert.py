@@ -25,9 +25,6 @@ def verify():
     commit_messages = utils.git_log_oneline()
     codefile = pathlib.Path(FILE_NAME)
     code = codefile.read_text()
-    correct_code = """
-def subtract(x, y):
-    return x + y"""
 
     payload = {
         "git status --porcelain": utils.git_status(),
@@ -35,7 +32,6 @@ def subtract(x, y):
         "git log --oneline": commit_messages,
         "git log -1 --pretty=%B": utils.git_log_last_pretty(),
         "code": code,
-        "correct_code": correct_code,
         "revert_hash": REVERT_HASH,
     }
     client.verify("revert", payload)
