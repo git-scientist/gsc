@@ -40,9 +40,7 @@ def git_log_last_oneline() -> str:
 
 def git_log_last_pretty() -> str:
     res = subprocess.run(["git", "log", "-1", "--pretty=%B"], stdout=PIPE, stderr=PIPE)
-    commit_msg = res.stdout.decode("utf-8").strip()
-    [_title, desc] = commit_msg.split("\n\n", 1)
-    return desc
+    return parse(res)
 
 
 def git_log_oneline() -> str:
