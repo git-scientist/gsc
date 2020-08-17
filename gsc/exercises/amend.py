@@ -2,7 +2,7 @@ import pathlib
 import subprocess
 from subprocess import PIPE
 
-from gsc import verifier, cli, setup_exercise
+from gsc import cli, setup_exercise, client
 from gsc.exercises import utils
 
 FILE_NAME = "useful_things.py"
@@ -55,43 +55,14 @@ def reset():
 
 
 def verify():
-    if not utils.clean_status():
-        raise verifier.VerifyError(
-            "Your git status is not clean. Run `git status` to see the problem."
-        )
-
-    # We should have 2 commit
-    commit_messages = utils.commit_messages()
-    num_commits = len(commit_messages)
-    if num_commits != 2:
-        raise verifier.VerifyError(
-            f"There {utils.pluralise_commits(num_commits)} on your local branch.\n"
-            "There should be exactly 2: the inital commit and the amended commit.\n"
-            "Run `gsc reset` to try again."
-        )
-
-    # The comment should be gone
+    commit_messages = utils.git_log_oneline()
     codefile = pathlib.Path(FILE_NAME)
     code = codefile.read_text()
-    if "TODO" in code:
-        raise verifier.VerifyError(
-            "You don't seem to have amended the commit.\n"
-            "Check the exercise description."
-        )
 
-    # The code should be correct
-    codefile = pathlib.Path(FILE_NAME)
-    code = codefile.read_text()
-    if (
-        """
-def subtract(x, y):
-    return x - y"""
-        not in code
-    ):
-        raise verifier.VerifyError(
-            "The code is no longer correct.\n"
-            "Make sure you don't delete or replace working code when you amend the commit!\n"
-            "Run `gsc reset` and try again."
-        )
-
-    cli.success("Done.")
+    payload = {
+        "git status --porcelain": utils.git_status(),
+        "git branch": utils.git_branch(),
+        "git log --oneline": commit_messages,
+        "code": code,
+    }
+    client.verify("amend", payload)

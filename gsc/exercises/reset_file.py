@@ -3,7 +3,7 @@ import pathlib
 import subprocess
 from subprocess import PIPE
 
-from gsc import verifier, cli
+from gsc import verifier, cli, client
 from gsc.exercises import utils
 
 FILE_NAME = "useful_things.py"
@@ -44,38 +44,21 @@ def reset():
 
 def verify():
     try:
-        pathlib.Path(".gsc_state").read_text()
+        state = json.loads(pathlib.Path(".gsc_state").read_text())
     except FileNotFoundError:
         raise verifier.VerifyError("You haven't set up the exercise.\nRun `gsc setup`.")
 
-    if not utils.clean_status():
-        raise verifier.VerifyError(
-            "Your git status is not clean. Run `git status` to see the problem."
-        )
-
-    # We should have 1 commit
-    commit_messages = utils.commit_messages()
-    num_commits = len(commit_messages)
-    if num_commits != 1:
-        raise verifier.VerifyError(
-            f"There {utils.pluralise_commits(num_commits)} on your local branch.\n"
-            "There should be exactly 1: the inital commit.\n"
-            "Run `gsc reset` to try again."
-        )
+    commit_messages = utils.git_log_oneline()
 
     # The code should be the same as in the initial commit
     codefile = pathlib.Path(FILE_NAME)
     code = codefile.read_text()
-    if (
-        """
-def subtract(x, y):
-    return x - y"""
-        not in code
-    ):
-        raise verifier.VerifyError(
-            "The code is not the same as it was originally.\n"
-            "You've done something strange. Email us for help if you're not sure what.\n"
-            "Run `gsc reset` and try again."
-        )
 
-    cli.success("Done.")
+    payload = {
+        "git status --porcelain": utils.git_status(),
+        "git branch": utils.git_branch(),
+        "git log --oneline": commit_messages,
+        "state": state,
+        "code": code,
+    }
+    client.verify("reset_file", payload)

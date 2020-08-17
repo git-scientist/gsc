@@ -1,6 +1,6 @@
 import os
 import pathlib
-from gsc import cli, client
+from gsc import cli
 from gsc.exercises import (
     my_first_commit,
     push_and_pull,
@@ -28,7 +28,6 @@ def verify(exercise: str = None):
     if exercise == "ssh":
         cli.title("Verifying ssh")
         ssh_clone.verify()
-        client.complete_exercise("ssh_clone")
         return
     elif exercise:
         raise VerifyError("Unknown Git Scientist exercise. Try upgrading gsc.")
@@ -62,4 +61,3 @@ def verify(exercise: str = None):
         amend.verify()
     else:
         raise VerifyError("Unknown Git Scientist exercise. Try upgrading gsc.")
-    client.complete_exercise(gsc_id)
