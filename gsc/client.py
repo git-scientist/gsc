@@ -42,8 +42,8 @@ def verify(id: str, payload: t.Dict[str, str]) -> str:
     raise api_error(res.status_code)
 
 
-def handle_warnings(reply: t.Dict[str, str]) -> None:
-    map(cli.warn, reply["warnings"])
+def handle_warnings(reply: t.Dict[str, t.Union[str, t.List[str]]]) -> None:
+    list(map(cli.warn, reply["warnings"]))
 
 
 def api_error(sc: int) -> APIError:
