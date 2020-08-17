@@ -17,8 +17,7 @@ GSC_TOKEN = GSC_DIR + ".gsc_token"
 if os.getenv("GSC_ENV") == "dev":
     BASE_URL = "ws://localhost:4000"
 else:
-    BASE_URL = "ws://www.gitscientist.com"
-API_URL = BASE_URL + "/api"
+    BASE_URL = "wss://www.gitscientist.com"
 
 
 class LoginError(Exception):
