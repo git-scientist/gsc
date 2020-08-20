@@ -56,6 +56,10 @@ async def handle_login(email: str):
 
             elif event == "login_success":
                 session_unique_id = resp["payload"]["session_unique_id"]
+
+                if not os.path.exists(GSC_DIR):
+                    os.makedirs(GSC_DIR)
+
                 with open(GSC_TOKEN, "w") as f:
                     f.write(session_unique_id)
                 break
