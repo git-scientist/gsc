@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gsc"
-version = "2.0.1"
+version = "2.0.2"
 description = "Git for Scientists practical exercise helper."
 authors = ["Daniel Tipping <daniel@gitscientist.com>"]
 license = "GPL-3.0-only"
