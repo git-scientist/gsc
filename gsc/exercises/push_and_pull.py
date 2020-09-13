@@ -24,7 +24,7 @@ def setup():
             cli.info("Not deleting.")
             raise typer.Abort()
         cli.info(f"Deleting {pull_repo_name}.")
-        utils.rmtree_readonl(pull_repo_name)
+        utils.rmtree_readonly(pull_repo_name)
 
     shutil.copytree(repo_name, pull_repo_name)
 
