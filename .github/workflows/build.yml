@@ -30,7 +30,7 @@ jobs:
       - name: Run Mypy
         run: make mypy
       - name: Run Pytype
-        if: ${{ matrix.python-version != 3.8 && matrix.os != 'windows-latest' }}
+        if: ${{ matrix.python-version != 3.8 && matrix.os == 'ubuntu-latest' }}
         run: make pytype
       - name: Run tests
         run: make test
