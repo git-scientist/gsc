@@ -1,5 +1,7 @@
 import os
 import pathlib
+import typing as t
+
 from gsc import cli
 from gsc.exercises import (
     my_first_commit,
@@ -19,7 +21,7 @@ class VerifyError(Exception):
     pass
 
 
-def verify(exercise: str = None):
+def verify(exercise: t.Optional[str] = None):
     while not os.path.exists(".git"):
         os.chdir("..")
         if os.getcwd() == "/":

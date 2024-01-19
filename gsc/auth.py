@@ -30,7 +30,7 @@ class AuthenticationError(Exception):
 
 async def handle_login(email: str):
     url = BASE_URL + "/socket/websocket"
-    async with websockets.connect(url) as websocket:
+    async with websockets.connect(url) as websocket:  # type: ignore
         login_msg = {
             "topic": "login",
             "event": "phx_join",
